@@ -1,23 +1,27 @@
 import $ from "./lib/jquery.js"
 
 $(() => {
-  console.log("document ready")
+  let count = 0
   const app = $("#app")
   const h1 = $("h1")
-  // h1.css("font-size", "40px")
-  // h1.on("click", () => console.log("ooof"))
-  // console.log($(document.createElement("div")))
-  h1.css({
-    fontSize: "40px",
-    color: "red"
-  })
+
+  app.append($("<button>count: 0</button><p>^ button up above!</p>"))
+
   
-  const div = $("<div>Hello There this is a div</div>")
-  app.append(div)
-  // let parsed = $("<h1>Helo</h1>")
-  // console.log(parsed.constructor.name)
-  // console.log($(h1.nodes[0].node))
-  // console.log(h1.css("font-size"))
-  // console.log(h1)
-  // console.log(h1.serialize())
+  const button = $("button")
+  button.css({
+    backgroundColor: "red",
+    borderRadius: "0.5rem",
+    fontSize: "1.25rem",
+    padding: "0.5rem",
+    cursor: "pointer",
+    outline: "none",
+    border: "none",
+    color: "#fff"
+  })
+  button.on("click", () => {
+    button.text(`count: ${ ++count }`)
+  })
+
+  console.log(button.css("font-family"))
 })

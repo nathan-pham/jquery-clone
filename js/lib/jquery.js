@@ -11,39 +11,34 @@ const generateCollection = (nodeList) => {
   return collection
 }
 
-const $ = (...selectors) => {
-  if(typeof selectors[0] == "function") {
-    document.addEventListener("DOMContentLoaded", selectors[0])
+const $ = (query) => {
+  if(typeof query == "function") {
+    document.addEventListener("DOMContentLoaded", query)
   }
-  else if(/<[a-z/][\s\S]*>/i.test(selectors[0])) {
-    return generateCollection(parse(selectors[0]))
+  else if(/<[a-z/][\s\S]*>/i.test(query)) {
+    return generateCollection(parse(query))
   }
-  else if(typeof selectors[0] == "string") {
-    return generateCollection(document.querySelectorAll(selectors[0]))
+  else if(typeof query == "string") {
+    return generateCollection(document.querySelectorAll(query))
   }
-  else if(selectors[0].tagName) {
-    return generateCollection([selectors[0]]) 
+  else if(query.tagName) {
+    return generateCollection([query]) 
   }
 }
-
 class NodeCollection {
   constructor(nodes) {
     this.nodes = nodes
-
-    const methods = [ "css", "on", "append" ]
-    for(const method of methods) {
-      this[method] = (...args) => {
-        this.nodes.forEach(node => {
-          node[method](...args)
-        })
-      }
-    }
+    return this.nodes.length <= 1 ? this.nodes.shift() : this
+  }
+  static isCollection(nodes) {
+    return nodes.constructor.name == "NodeCollection"
   }
   each(callback) {
     this.nodes.forEach((node, index) => {
       callback(node, index)
     })
   }
+
 }
 
 class Node {
@@ -53,15 +48,18 @@ class Node {
   serialize() {
     return this.node.outerHTML
   }
-  prepend(nodeList) {
-    nodeList.each((nodeClass) => {
-      this.node.prepend(nodeClass.node)
-    })
+  prepend(nodes) {
+    NodeCollection.isCollection(nodes)
+      ? nodes.each((nodeClass) => this.node.prepend(nodeClass.node))
+      : this.node.prepend(nodes.node)
   }
-  append(nodeList) {
-    nodeList.each((nodeClass) => {
-      this.node.append(nodeClass.node)
-    })
+  append(nodes) {
+    NodeCollection.isCollection(nodes)
+      ? nodes.each((nodeClass) => this.node.append(nodeClass.node))
+      : this.node.append(nodes.node)
+  }
+  text(value) {
+    this.node.textContent = value
   }
   css(property, value) {
     if(typeof property == "string") {
@@ -81,12 +79,5 @@ class Node {
     document.addEventListener(type, callback)
   }
 }
-
-// function $(...) {
-//   if(typeof selector == "function") {
-//     document.addEventListener("DOMContentLoaded", selector)
-//     document.addEventListener("load", selector)
-//   }
-// }
 
 export default $
